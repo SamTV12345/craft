@@ -296,7 +296,6 @@ impl LockfileStructure {
         if snapshot
             && p.1.dependencies.is_none()
             && p.1.peer_dependencies.is_none()
-            && p.1.has_bin.is_none()
         {
             packages_serialized.push_str(&Self::format_line(p.0, Some("{}"), index));
         } else {
@@ -323,30 +322,7 @@ impl LockfileStructure {
             }
         }
 
-        if let Some(peer) = &p.1.peer_dependencies {
-            packages_serialized.push_str(&Self::format_line(PEER_DEPENDENCIES, None, index + 1));
-            peer.iter().for_each(|(k, v)| {
-                packages_serialized.push_str(&Self::format_line(k, Some(v), index + 2));
-            })
-        }
 
-        if let Some(peer_meta) = &p.1.peer_dependencies_meta {
-            packages_serialized.push_str(&Self::format_line(
-                PEER_DEPENDENCIES_META,
-                None,
-                index + 1,
-            ));
-            peer_meta.iter().for_each(|(k, v)| {
-                packages_serialized.push_str(&Self::format_line(k, None, index + 2));
-                if let Some(opt) = v.optional {
-                    packages_serialized.push_str(&Self::format_line(
-                        OPTIONAL,
-                        Some(&opt.to_string()),
-                        index + 3,
-                    ));
-                }
-            })
-        }
 
         if !snapshot {
             if let Some(engines) = &p.1.engines {
@@ -393,6 +369,42 @@ impl LockfileStructure {
             }
         }
 
+
+        if !snapshot {
+            if let Some(bin) = &p.1.has_bin {
+                packages_serialized.push_str(&Self::format_line(
+                    HAS_BIN,
+                    Some(&bin.to_string()),
+                    index + 1,
+                ));
+            }
+        }
+
+        if let Some(peer) = &p.1.peer_dependencies {
+            packages_serialized.push_str(&Self::format_line(PEER_DEPENDENCIES, None, index + 1));
+            peer.iter().for_each(|(k, v)| {
+                packages_serialized.push_str(&Self::format_line(k, Some(v), index + 2));
+            })
+        }
+
+        if let Some(peer_meta) = &p.1.peer_dependencies_meta {
+            packages_serialized.push_str(&Self::format_line(
+                PEER_DEPENDENCIES_META,
+                None,
+                index + 1,
+            ));
+            peer_meta.iter().for_each(|(k, v)| {
+                packages_serialized.push_str(&Self::format_line(k, None, index + 2));
+                if let Some(opt) = v.optional {
+                    packages_serialized.push_str(&Self::format_line(
+                        OPTIONAL,
+                        Some(&opt.to_string()),
+                        index + 3,
+                    ));
+                }
+            })
+        }
+
         if let Some(cpu) = &p.1.cpu {
             packages_serialized.push_str(&Self::format_line(
                 CPU,
@@ -405,14 +417,6 @@ impl LockfileStructure {
             packages_serialized.push_str(&Self::format_line(
                 OS,
                 Some(&Self::format_inline_vector(os)),
-                index + 1,
-            ));
-        }
-
-        if let Some(bin) = &p.1.has_bin {
-            packages_serialized.push_str(&Self::format_line(
-                HAS_BIN,
-                Some(&bin.to_string()),
                 index + 1,
             ));
         }
