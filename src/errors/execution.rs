@@ -10,4 +10,6 @@ pub enum ExecutionError {
     ScriptNotFound(String),
     #[error("Failed to find a script in package.json")]
     NoScriptsFound,
+    #[error("Failed to parse .npmrc file")]
+    ConfigError(String),
 }
